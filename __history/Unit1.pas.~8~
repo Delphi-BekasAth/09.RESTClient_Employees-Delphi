@@ -1,0 +1,280 @@
+unit Unit1;
+
+interface
+
+uses
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, REST.Types, REST.Client,
+  Data.Bind.Components, Data.Bind.ObjectScope, System.JSON, clsEmployee, System.Generics.Collections,
+  IdBaseComponent, IdComponent, IdTCPConnection, IdTCPClient, IdHTTP,
+  IdAuthentication;
+
+type
+  TForm1 = class(TForm)
+    Label1: TLabel;
+    employeeIdTxt: TEdit;
+    showBtn: TButton;
+    RESTClient1: TRESTClient;
+    RESTRequest1: TRESTRequest;
+    RESTResponse1: TRESTResponse;
+    getDataBtn: TButton;
+    printDataBtn: TButton;
+    allEmployeesListBox: TListBox;
+    aEmployeeListBox: TListBox;
+    RESTClient2: TRESTClient;
+    RESTRequest2: TRESTRequest;
+    Label2: TLabel;
+    Label3: TLabel;
+    Label4: TLabel;
+    createNameTxt: TEdit;
+    createSalaryTxt: TEdit;
+    createAgeTxt: TEdit;
+    createEmployeeBtn: TButton;
+    RESTClient3: TRESTClient;
+    RESTRequest3: TRESTRequest;
+    RESTResponse2: TRESTResponse;
+    procedure getDataBtnClick(Sender: TObject);
+    procedure printDataBtnClick(Sender: TObject);
+    procedure showBtnClick(Sender: TObject);
+    procedure createEmployeeBtnClick(Sender: TObject);
+  private
+    { Private declarations }
+    employees: TList<TEmployee>;
+
+    procedure GetAllEmployeesData;
+  public
+    { Public declarations }
+  end;
+
+var
+  Form1: TForm1;
+
+implementation
+
+{$R *.dfm}
+
+procedure TForm1.getDataBtnClick(Sender: TObject);
+begin
+  GetAllEmployeesData;
+end;
+
+procedure TForm1.printDataBtnClick(Sender: TObject);
+var
+  emp: TEmployee;
+  str: string;
+begin
+
+  allEmployeesListBox.Clear;
+  for emp in employees do
+  begin
+    str := emp.GetId.ToString + ' ' + emp.GetName + ' ' + emp.GetSalary.ToString + ' ' + emp.GetAge.ToString;
+    allEmployeesListBox.Items.Add(str);
+  end;
+
+end;
+
+// JSON GET (one employee)
+procedure TForm1.showBtnClick(Sender: TObject);
+var
+  getId: string;
+  jsv: TJSONValue;
+  jsStatus: TJSonValue;
+  jsMessage: TJSONValue;
+  jsit: TJSONValue;
+  id: Integer;
+  name: string;
+  salary: Double;
+  age: Integer;
+
+begin
+
+    aEmployeeListBox.Clear;
+    getId := employeeIdTxt.Text;
+
+    try
+
+    // Prepare Request's url
+    RESTRequest2.ResourceSuffix := getId;
+
+    // Execute request
+    RESTRequest2.Execute;
+
+
+      if RESTResponse1.StatusCode = 200 then
+      begin
+
+        // Extract JSON response
+        jsv := TJSONObject.ParseJSONValue(RESTResponse1.Content);
+        jsStatus := jsv.FindValue('status');
+        jsMessage := jsv.FindValue('message');
+
+        if jsStatus.Value = 'success' then
+        begin
+
+          ShowMessage(jsMessage.ToString);
+
+          jsit := jsv.FindValue('data');
+
+          id := jsit.GetValue<Integer>('id');
+          name := jsit.GetValue<string>('name');
+          salary := jsit.GetValue<Double>('salary');
+          age := jsit.GetValue<Integer>('age');
+
+          aEmployeeListBox.Items.Add('ID: ' + id.ToString);
+          aEmployeeListBox.Items.Add('Name: ' + name);
+          aEmployeeListBox.Items.Add('Salary: ' + salary.ToString);
+          aEmployeeListBox.Items.Add('Age: ' + age.ToString);
+
+        end
+        else
+        begin
+
+          ShowMessage(jsMessage.Value);
+
+        end;
+      end;
+
+    except
+      on e: Exception do
+        ShowMessage('Error. Connection faild');
+    end;
+
+
+
+end;
+
+
+// JSON POST
+procedure TForm1.createEmployeeBtnClick(Sender: TObject);
+var
+  name: string;
+  salary: string;
+  age: string;
+  jsres: TJSONValue;
+  jsit: TJSONValue;
+
+begin
+
+  name := createNameTxt.Text;
+  salary := createSalaryTxt.Text;
+  age := createAgeTxt.Text;
+
+  try
+
+    // Configure POST parameters
+    RESTRequest3.Params.AddItem;
+    RESTRequest3.Params.Items[0].name := 'name';
+    RESTRequest3.Params.Items[0].Value := name;
+
+    RESTRequest3.Params.AddItem;
+    RESTRequest3.Params.Items[1].name := 'salary';
+    RESTRequest3.Params.Items[1].Value := salary;
+
+    RESTRequest3.Params.AddItem;
+    RESTRequest3.Params.Items[2].name := 'age';
+    RESTRequest3.Params.Items[2].Value := age;
+
+    try
+
+      // Execute request
+      RESTRequest3.Execute;
+
+      if RESTResponse2.StatusCode = 200 then
+      begin
+
+        // Extract JSON response
+        jsres :=  TJSONObject.ParseJSONValue(RESTResponse2.Content);
+        jsit := jsres.FindValue('status');
+
+        if jsit <> nil then
+          ShowMessage('Success!')
+        else
+          ShowMessage('Something went wrong. Try again!');
+
+      end;
+
+    except
+      on e: Exception do
+      ShowMessage(e.Message);
+
+    end;
+
+  except
+    on e: Exception do
+      ShowMessage(e.Message);
+
+  end;
+end;
+
+
+//JSON GET (all Employees)
+procedure TForm1.GetAllEmployeesData;
+var
+  jsVl: TJSONValue;
+  jsStatus: TJSONValue;
+  jsMessage: TJSONValue;
+  jsAr: TJSONArray;
+  jsIt: TJSONValue;
+  emp: TEmployee;
+  empId: Integer;
+  empName: string;
+  empSalary: Double;
+  empAge: Integer;
+
+begin
+
+  try
+
+    // Execute request
+    RESTRequest1.Execute;
+
+    if RESTResponse1.StatusCode = 200 then
+    begin
+
+      // Extract JSON response
+      jsVl := TJSONObject.ParseJSONValue(RESTResponse1.Content);
+      employees := TList<TEmployee>.Create;
+
+      jsStatus := jsVl.FindValue('status');
+      jsMessage := jsVl.FindValue('message');
+
+      if jsStatus.Value = 'success' then
+      begin
+
+        ShowMessage(jsMessage.Value);
+
+        jsAr := jsVl.FindValue('data') as TJSONArray;
+
+        for jsIt in jsAr do
+        begin
+          empId := jsIt.GetValue<Integer>('id');
+          empName := jsIt.GetValue<string>('name');
+          empSalary := jsIt.GetValue<Double>('salary');
+          empAge := jsIt.GetValue<Integer>('age');
+
+          emp := TEmployee.Create(empId, empName, empSalary, empAge);
+          employees.Add(emp);
+        end;
+
+
+        printDataBtn.Enabled := true;
+
+      end
+      else
+      begin
+        ShowMessage(jsMessage.Value);
+      end;
+
+    end;
+
+  except
+
+    on Exception do
+    begin
+      ShowMessage('Error. Connection faild!');
+    end;
+
+  end;
+end;
+
+end.

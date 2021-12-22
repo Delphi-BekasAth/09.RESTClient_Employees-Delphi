@@ -41,6 +41,39 @@ object Form1: TForm1
     Height = 13
     Caption = 'Age: '
   end
+  object Label5: TLabel
+    Left = 19
+    Top = 191
+    Width = 55
+    Height = 19
+    Caption = 'Create'
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -16
+    Font.Name = 'Tahoma'
+    Font.Style = [fsBold]
+    ParentFont = False
+  end
+  object Label6: TLabel
+    Left = 19
+    Top = 380
+    Width = 54
+    Height = 19
+    Caption = 'Delete'
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -16
+    Font.Name = 'Tahoma'
+    Font.Style = [fsBold]
+    ParentFont = False
+  end
+  object Label7: TLabel
+    Left = 22
+    Top = 408
+    Width = 18
+    Height = 13
+    Caption = 'ID: '
+  end
   object employeeIdTxt: TEdit
     Left = 88
     Top = 16
@@ -80,7 +113,7 @@ object Form1: TForm1
     Left = 367
     Top = 47
     Width = 258
-    Height = 353
+    Height = 314
     ItemHeight = 13
     TabOrder = 4
   end
@@ -122,8 +155,24 @@ object Form1: TForm1
     TabOrder = 9
     OnClick = createEmployeeBtnClick
   end
+  object deleteEmpTxt: TEdit
+    Left = 59
+    Top = 405
+    Width = 70
+    Height = 21
+    TabOrder = 10
+  end
+  object deleteEmpBtn: TButton
+    Left = 135
+    Top = 403
+    Width = 75
+    Height = 25
+    Caption = 'Delete'
+    TabOrder = 11
+    OnClick = deleteEmpBtnClick
+  end
   object RESTClient1: TRESTClient
-    BaseURL = 'http://dummy.restapiexample.com/api/v1/employees'
+    BaseURL = 'http://localhost:8080/employees'
     Params = <>
     Left = 368
     Top = 72
@@ -141,7 +190,7 @@ object Form1: TForm1
     Top = 72
   end
   object RESTClient2: TRESTClient
-    BaseURL = 'http://dummy.restapiexample.com/api/v1/employee'
+    BaseURL = 'http://localhost:8080/employee'
     Params = <>
     Left = 40
     Top = 64
@@ -157,7 +206,7 @@ object Form1: TForm1
   object RESTClient3: TRESTClient
     Accept = 'application/json, text/plain; q=0.9, text/html;q=0.8,'
     AcceptCharset = 'utf-8, *;q=0.8'
-    BaseURL = 'http://dummy.restapiexample.com/api/v1/create'
+    BaseURL = 'http://localhost:8080/create'
     ContentType = 'application/x-www-form-urlencoded'
     Params = <>
     Left = 24

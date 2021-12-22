@@ -33,10 +33,16 @@ type
     RESTClient3: TRESTClient;
     RESTRequest3: TRESTRequest;
     RESTResponse2: TRESTResponse;
+    Label5: TLabel;
+    Label6: TLabel;
+    Label7: TLabel;
+    deleteEmpTxt: TEdit;
+    deleteEmpBtn: TButton;
     procedure getDataBtnClick(Sender: TObject);
     procedure printDataBtnClick(Sender: TObject);
     procedure showBtnClick(Sender: TObject);
     procedure createEmployeeBtnClick(Sender: TObject);
+    procedure deleteEmpBtnClick(Sender: TObject);
   private
     { Private declarations }
     employees: TList<TEmployee>;
@@ -78,6 +84,8 @@ procedure TForm1.showBtnClick(Sender: TObject);
 var
   getId: string;
   jsv: TJSONValue;
+  jsStatus: TJSonValue;
+  jsMessage: TJSONValue;
   jsit: TJSONValue;
   id: Integer;
   name: string;
@@ -97,39 +105,49 @@ begin
     // Execute request
     RESTRequest2.Execute;
 
-      try
-        if RESTResponse1.StatusCode = 200 then
+
+      if RESTResponse1.StatusCode = 200 then
+      begin
+
+        // Extract JSON response
+        jsv := TJSONObject.ParseJSONValue(RESTResponse1.Content);
+        jsStatus := jsv.FindValue('status');
+        jsMessage := jsv.FindValue('message');
+
+        if jsStatus.Value = 'success' then
         begin
 
-          // Extract JSON response
-          jsv := TJSONObject.ParseJSONValue(RESTResponse1.Content);
+          ShowMessage(jsMessage.ToString);
+
           jsit := jsv.FindValue('data');
 
           id := jsit.GetValue<Integer>('id');
-          name := jsit.GetValue<string>('employee_name');
-          salary := jsit.GetValue<Double>('employee_salary');
-          age := jsit.GetValue<Integer>('employee_age');
+          name := jsit.GetValue<string>('name');
+          salary := jsit.GetValue<Double>('salary');
+          age := jsit.GetValue<Integer>('age');
 
           aEmployeeListBox.Items.Add('ID: ' + id.ToString);
           aEmployeeListBox.Items.Add('Name: ' + name);
           aEmployeeListBox.Items.Add('Salary: ' + salary.ToString);
           aEmployeeListBox.Items.Add('Age: ' + age.ToString);
-        end;
 
-      except
-          on e: Exception do
-            ShowMessage(e.Message);
+        end
+        else
+        begin
+
+          ShowMessage(jsMessage.Value);
+
+        end;
       end;
 
     except
       on e: Exception do
-        ShowMessage(e.Message);
+        ShowMessage('Error. Connection faild');
     end;
 
 
 
 end;
-
 
 // JSON POST
 procedure TForm1.createEmployeeBtnClick(Sender: TObject);
@@ -148,7 +166,9 @@ begin
 
   try
 
-    // Configure POST parameters
+    // Configure POST parametempers
+    RESTClient3.BaseURL := 'http://localhost:8080/create';
+
     RESTRequest3.Params.AddItem;
     RESTRequest3.Params.Items[0].name := 'name';
     RESTRequest3.Params.Items[0].Value := name;
@@ -195,9 +215,65 @@ end;
 
 
 //JSON GET (all Employees)
+procedure TForm1.deleteEmpBtnClick(Sender: TObject);
+var
+  empId: string;
+  jsv: TJSONValue;
+  jsStatus: TJSONValue;
+  jsMessage: TJSONValue;
+  jsit: TJSONValue;
+
+begin
+
+  empId := deleteEmpTxt.Text;
+
+  try
+
+    RESTClient3.BaseURL := 'http://localhost:8080/delete';
+    RESTRequest3.ResourceSuffix := empId;
+
+    // Execute request
+    RESTRequest3.Execute;
+
+
+      if RESTResponse2.StatusCode = 200 then
+      begin
+
+        // Extract JSON response
+        jsv := TJSONObject.ParseJSONValue(RESTResponse2.Content);
+        jsStatus := jsv.FindValue('status');
+        jsMessage := jsv.FindValue('message');
+
+        if jsStatus.Value = 'success' then
+        begin
+
+          ShowMessage(jsMessage.ToString);
+
+        end
+        else
+        begin
+
+          ShowMessage(jsMessage.Value);
+
+        end;
+      end;
+
+  except
+
+    on e: Exception do
+        ShowMessage('Error. Connection faild');
+
+  end;
+
+  RESTRequest3.ResourceSuffix := '';
+
+end;
+
 procedure TForm1.GetAllEmployeesData;
 var
   jsVl: TJSONValue;
+  jsStatus: TJSONValue;
+  jsMessage: TJSONValue;
   jsAr: TJSONArray;
   jsIt: TJSONValue;
   emp: TEmployee;
@@ -220,38 +296,43 @@ begin
       jsVl := TJSONObject.ParseJSONValue(RESTResponse1.Content);
       employees := TList<TEmployee>.Create;
 
-      try
+      jsStatus := jsVl.FindValue('status');
+      jsMessage := jsVl.FindValue('message');
+
+      if jsStatus.Value = 'success' then
+      begin
+
+        ShowMessage(jsMessage.Value);
+
         jsAr := jsVl.FindValue('data') as TJSONArray;
 
         for jsIt in jsAr do
         begin
           empId := jsIt.GetValue<Integer>('id');
-          empName := jsIt.GetValue<string>('employee_name');
-          empSalary := jsIt.GetValue<Double>('employee_salary');
-          empAge := jsIt.GetValue<Integer>('employee_age');
+          empName := jsIt.GetValue<string>('name');
+          empSalary := jsIt.GetValue<Double>('salary');
+          empAge := jsIt.GetValue<Integer>('age');
 
           emp := TEmployee.Create(empId, empName, empSalary, empAge);
           employees.Add(emp);
         end;
 
-        ShowMessage('Success!');
+
         printDataBtn.Enabled := true;
 
-      finally
-        jsVl.Free;
-        if Assigned(emp) then
-          emp.Free;
+      end
+      else
+      begin
+        ShowMessage(jsMessage.Value);
       end;
 
-    end
-    else
-      ShowMessage('Error on Response');
+    end;
 
   except
 
     on Exception do
     begin
-      ShowMessage('Error on execution!');
+      ShowMessage('Error. Connection faild!');
     end;
 
   end;
