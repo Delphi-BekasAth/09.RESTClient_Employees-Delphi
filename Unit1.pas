@@ -43,10 +43,10 @@ type
     procedure showBtnClick(Sender: TObject);
     procedure createEmployeeBtnClick(Sender: TObject);
     procedure deleteEmpBtnClick(Sender: TObject);
+    procedure FormCreate(Sender: TObject);
+    procedure FormDestroy(Sender: TObject);
   private
     { Private declarations }
-    employees: TList<TEmployee>;
-
     procedure GetAllEmployeesData;
   public
     { Public declarations }
@@ -58,12 +58,37 @@ var
 implementation
 
 {$R *.dfm}
+var
+  employees: TList<TEmployee>;
+
+(*------------------------------------------------------------------------------*)
+
+procedure TForm1.FormCreate(Sender: TObject);
+begin
+
+  employees := TList<TEmployee>.Create;
+
+end;
+
+(*------------------------------------------------------------------------------*)
+
+procedure TForm1.FormDestroy(Sender: TObject);
+begin
+
+  FreeAndnil(employees);
+
+end;
+
+(*------------------------------------------------------------------------------*)
 
 procedure TForm1.getDataBtnClick(Sender: TObject);
 begin
   GetAllEmployeesData;
 end;
 
+(*------------------------------------------------------------------------------*)
+
+// Print Employees to List
 procedure TForm1.printDataBtnClick(Sender: TObject);
 var
   emp: TEmployee;
@@ -77,9 +102,17 @@ begin
     allEmployeesListBox.Items.Add(str);
   end;
 
+  while employees.Count > 0  do
+  begin
+    FreeAndNil(employees[0]);
+    employees.Delete(0);
+  end;
+
 end;
 
-// JSON GET (one employee)
+(*------------------------------------------------------------------------------*)
+
+// JSON GET - Get one employee
 procedure TForm1.showBtnClick(Sender: TObject);
 var
   getId: string;
@@ -145,18 +178,21 @@ begin
         ShowMessage('Error. Connection faild');
     end;
 
-
-
 end;
 
-// JSON POST
+(*------------------------------------------------------------------------------*)
+
+// JSON POST - Create an Employee
 procedure TForm1.createEmployeeBtnClick(Sender: TObject);
 var
+  id: String;
   name: string;
   salary: string;
   age: string;
   jsres: TJSONValue;
   jsit: TJSONValue;
+  jsData: TJSONValue;
+  sucStr: String;
 
 begin
 
@@ -192,9 +228,19 @@ begin
         // Extract JSON response
         jsres :=  TJSONObject.ParseJSONValue(RESTResponse2.Content);
         jsit := jsres.FindValue('status');
+        jsData := jsres.FindValue('data');
 
         if jsit <> nil then
-          ShowMessage('Success!')
+        begin
+
+          id := jsData.GetValue<String>('id');
+          name := jsData.GetValue<String>('name');
+          salary := jsData.GetValue<String>('salary');
+          age := jsData.GetValue<String>('age');
+
+          sucStr := 'Success! ' + id + ', ' + name + ', ' + salary + ', ' + age + ' has been created';
+          ShowMessage(sucStr);
+        end
         else
           ShowMessage('Something went wrong. Try again!');
 
@@ -211,17 +257,22 @@ begin
       ShowMessage(e.Message);
 
   end;
+
+  createNameTxt.Clear;
+  createSalaryTxt.Clear;
+  createAgeTxt.Clear;
+
 end;
 
+(*------------------------------------------------------------------------------*)
 
-//JSON GET (all Employees)
+// Delete an Employee
 procedure TForm1.deleteEmpBtnClick(Sender: TObject);
 var
   empId: string;
   jsv: TJSONValue;
   jsStatus: TJSONValue;
   jsMessage: TJSONValue;
-  jsit: TJSONValue;
 
 begin
 
@@ -267,8 +318,13 @@ begin
 
   RESTRequest3.ResourceSuffix := '';
 
+  deleteEmpTxt.Clear;
+
 end;
 
+(*------------------------------------------------------------------------------*)
+
+//JSON GET - Get all Employees
 procedure TForm1.GetAllEmployeesData;
 var
   jsVl: TJSONValue;
@@ -294,7 +350,7 @@ begin
 
       // Extract JSON response
       jsVl := TJSONObject.ParseJSONValue(RESTResponse1.Content);
-      employees := TList<TEmployee>.Create;
+
 
       jsStatus := jsVl.FindValue('status');
       jsMessage := jsVl.FindValue('message');
@@ -337,5 +393,7 @@ begin
 
   end;
 end;
+
+(*------------------------------------------------------------------------------*)
 
 end.
