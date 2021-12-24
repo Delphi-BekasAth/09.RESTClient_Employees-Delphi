@@ -1,8 +1,8 @@
 object Form1: TForm1
   Left = 0
   Top = 0
-  Caption = 'Client'
-  ClientHeight = 563
+  Caption = '.Vla'
+  ClientHeight = 503
   ClientWidth = 673
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -76,47 +76,6 @@ object Form1: TForm1
     Height = 13
     Caption = 'ID: '
   end
-  object Label8: TLabel
-    Left = 367
-    Top = 358
-    Width = 59
-    Height = 19
-    Caption = 'Update'
-    Font.Charset = DEFAULT_CHARSET
-    Font.Color = clWindowText
-    Font.Height = -16
-    Font.Name = 'Tahoma'
-    Font.Style = [fsBold]
-    ParentFont = False
-  end
-  object Label9: TLabel
-    Left = 367
-    Top = 391
-    Width = 18
-    Height = 13
-    Caption = 'ID: '
-  end
-  object Label10: TLabel
-    Left = 367
-    Top = 421
-    Width = 34
-    Height = 13
-    Caption = 'Name: '
-  end
-  object Label11: TLabel
-    Left = 367
-    Top = 448
-    Width = 37
-    Height = 13
-    Caption = 'Salary: '
-  end
-  object Label12: TLabel
-    Left = 367
-    Top = 480
-    Width = 26
-    Height = 13
-    Caption = 'Age: '
-  end
   object employeeIdTxt: TEdit
     Left = 88
     Top = 16
@@ -156,7 +115,7 @@ object Form1: TForm1
     Left = 367
     Top = 47
     Width = 258
-    Height = 282
+    Height = 314
     ItemHeight = 13
     TabOrder = 4
   end
@@ -214,65 +173,6 @@ object Form1: TForm1
     TabOrder = 11
     OnClick = deleteEmpBtnClick
   end
-  object updateIdTxt: TEdit
-    Left = 418
-    Top = 387
-    Width = 121
-    Height = 21
-    TabOrder = 12
-  end
-  object updateNameTxt: TEdit
-    Left = 418
-    Top = 418
-    Width = 121
-    Height = 21
-    Enabled = False
-    TabOrder = 13
-  end
-  object updateSalaryTxt: TEdit
-    Left = 418
-    Top = 445
-    Width = 121
-    Height = 21
-    Enabled = False
-    TabOrder = 14
-  end
-  object updateAgeTxt: TEdit
-    Left = 418
-    Top = 477
-    Width = 121
-    Height = 21
-    Enabled = False
-    TabOrder = 15
-  end
-  object findBtn: TButton
-    Left = 550
-    Top = 385
-    Width = 75
-    Height = 25
-    Caption = 'Find'
-    TabOrder = 16
-    OnClick = findBtnClick
-  end
-  object updateBtn: TButton
-    Left = 494
-    Top = 520
-    Width = 75
-    Height = 25
-    Caption = 'Update'
-    Enabled = False
-    TabOrder = 17
-    OnClick = updateBtnClick
-  end
-  object updateClearBtn: TButton
-    Left = 575
-    Top = 520
-    Width = 91
-    Height = 25
-    Caption = 'Clear'
-    TabOrder = 18
-    OnClick = updateClearBtnClick
-  end
   object RESTClient1: TRESTClient
     BaseURL = 'http://localhost:8080/employees'
     Params = <>
@@ -327,26 +227,5 @@ object Form1: TForm1
     ContentType = 'application/json'
     Left = 176
     Top = 296
-  end
-  object RESTClient4: TRESTClient
-    Accept = 'application/json, text/plain; q=0.9, text/html;q=0.8,'
-    AcceptCharset = 'utf-8, *;q=0.8'
-    ContentType = 'application/x-www-form-urlencoded'
-    Params = <>
-    Left = 296
-    Top = 512
-  end
-  object RESTRequest4: TRESTRequest
-    Client = RESTClient4
-    Method = rmPOST
-    Params = <>
-    Response = RESTResponse4
-    Left = 360
-    Top = 512
-  end
-  object RESTResponse4: TRESTResponse
-    ContentType = 'application/json'
-    Left = 416
-    Top = 512
   end
 end

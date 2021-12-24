@@ -418,7 +418,7 @@ end;
 // Check employee ID for update
 procedure TForm1.findBtnClick(Sender: TObject);
 var
-  idToCheck: Integer;
+  idToCheck: String;
   jsResp: TJSONValue;
   jsStatus: TJSONValue;
   jsMes: TJSONValue;
@@ -426,12 +426,12 @@ var
 
 begin
 
-  idToCheck := StrToInt(updateIdTxt.Text);
+  idToCheck := updateIdTxt.Text;
 
   try
 
     RESTClient4.BaseURL := 'http://localhost:8080/checkForUpdate';
-    RESTRequest4.ResourceSuffix := idToCheck.ToString;
+    RESTRequest4.ResourceSuffix := idToCheck;
     RESTRequest4.Execute;
 
     if RESTResponse4.StatusCode = 200 then
@@ -507,19 +507,6 @@ begin
 
     RESTClient4.BaseURL := 'http://localhost:8080/update';
     RESTRequest4.ResourceSuffix := id.ToString;
-
-    RESTRequest4.Params.AddItem;
-    RESTRequest4.Params.Items[0].name := 'name';
-    RESTRequest4.Params.Items[0].Value := name;
-
-    RESTRequest4.Params.AddItem;
-    RESTRequest4.Params.Items[1].name := 'salary';
-    RESTRequest4.Params.Items[1].Value := salary.ToString;
-
-    RESTRequest4.Params.AddItem;
-    RESTRequest4.Params.Items[2].name := 'age';
-    RESTRequest4.Params.Items[2].Value := age.ToString;
-
     RESTRequest4.Execute;
 
     if RESTResponse4.StatusCode = 200 then
